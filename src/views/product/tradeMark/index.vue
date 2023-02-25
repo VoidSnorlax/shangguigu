@@ -73,20 +73,27 @@
     -->
     <el-dialog title="添加" :visible.sync="dialogFormVisible">
       <!-- 表单el-form 
+           model收集表单数据存放于那个对象 
       -->
-      <el-form style="width: 80%">
+      <el-form style="width: 80%" :model="tmFrom">
         <el-form-item label="品牌名称" label-width="100px">
-          <el-input autocomplete="off"></el-input>
+          <el-input autocomplete="off" v-model="tmFrom.tmName"></el-input>
         </el-form-item>
         <el-form-item label="品牌LOGO" label-width="100px">
+          <!-- 上传组件不能使用 v-model
+               action:设置图片上传地址
+               on-success:图片上传成功的回调
+               before-upload:上传图片之前回调
+               -->
           <el-upload
             class="avatar-uploader"
-            action="https://jsonplaceholder.typicode.com/posts/"
+            action="list-api/admin/product/fileUpload"
             :show-file-list="false"
             :on-success="handleAvatarSuccess"
             :before-upload="beforeAvatarUpload"
           >
-            <img v-if="imageUrl" :src="imageUrl" class="avatar" />
+            <!-- 通过 imageUrl控制图片显示-->
+            <img v-if="tmFrom.logoUrl" :src="tmFrom.logoUrl" class="avatar" />
             <i v-else class="el-icon-plus avatar-uploader-icon"></i>
             <div slot="tip" class="el-upload__tip">
               只能上传jpg/png文件，且不超过500kb
@@ -96,9 +103,7 @@
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取 消</el-button>
-        <el-button type="primary" @click="dialogFormVisible = false"
-          >确 定</el-button
-        >
+        <el-button type="primary" @click="addOrUpdate">确 定</el-button>
       </div>
     </el-dialog>
   </div>
@@ -121,6 +126,11 @@ export default {
       dialogFormVisible: false,
       //上传图片使用的属性
       imageUrl: "",
+      //收集品牌信息(对象身上的属性必须和后端对接保持一直)
+      tmFrom: {
+        tmName: "",
+        logoUrl: "",
+      },
     };
   },
   mounted() {
@@ -156,6 +166,8 @@ export default {
     //增加方法
     showDialog() {
       this.dialogFormVisible = true;
+      this.tmFrom.tmName = "";
+      this.tmFrom.logoUrl = "";
     },
     //修改方法
     update() {
@@ -163,9 +175,13 @@ export default {
     },
     //上传成功的回调
     handleAvatarSuccess(res, file) {
+      //res:上传成功之后返回给前端的数据
+      //file:上传成功后服务器返回的数据
       this.imageUrl = URL.createObjectURL(file.raw);
+      console.log(res);
+      this.tmFrom.logoUrl = res.data;
     },
-    //上传失败的回调
+    //上传之前的回调
     beforeAvatarUpload(file) {
       const isJPG = file.type === "image/jpeg";
       const isLt2M = file.size / 1024 / 1024 < 2;
@@ -177,6 +193,17 @@ export default {
         this.$message.error("上传头像图片大小不能超过 2MB!");
       }
       return isJPG && isLt2M;
+    },
+    async addOrUpdate() {
+      this.dialogFormVisible = false;
+      let res = await this.$API.trademark.reqAdd(this.tmFrom);
+      console.log(res);
+      if (res.code == 200) {
+        //弹出信息
+        this.$message(this.tmFrom.id ? "修改成功" : "添加成功");
+        //再次获取数据
+        this.getPageList();
+      }
     },
   },
 };
