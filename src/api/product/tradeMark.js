@@ -11,6 +11,7 @@ export const reqTreadeMark = (page, limit) => {
 //新增品牌接口
 //注意:新增品牌不需要传递ID,ID是服务器生成的
 export const reqAdd = (tradeMark) => {
+  //如果有ID就是更新方法
   if (tradeMark.id) {
     return request({
       url: `list-api/admin/product/baseTrademark/update`,
@@ -18,6 +19,7 @@ export const reqAdd = (tradeMark) => {
       data: tradeMark,
     });
   } else {
+    //没有ID就是新增方法
     return request({
       url: `list-api/admin/product/baseTrademark/save`,
       method: "post",

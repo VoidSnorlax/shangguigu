@@ -5,7 +5,7 @@
       type="primary"
       icon="el-icon-plus"
       style="margin: 10px 0"
-      @click="showDialog()"
+      @click="showDialog"
       >添加</el-button
     >
     <!-- 表格组件el-table
@@ -34,11 +34,12 @@
         </template>
       </el-table-column>
       <el-table-column prop="col.id" label="操作" width="col.width">
+        <!-- row对应这一行的信息 -->
         <template slot-scope="{ row, $index }">
           <el-button
             type="warning"
             size="mini"
-            @click="update()"
+            @click="update(row)"
             icon="el-icon-edit"
             >操作</el-button
           >
@@ -71,7 +72,10 @@
     <!-- 对话框el-dialog
          visible.sync控制对话框显示隐藏
     -->
-    <el-dialog title="添加" :visible.sync="dialogFormVisible">
+    <el-dialog
+      :title="tmFrom.id ? '修改品牌' : '添加品牌'"
+      :visible.sync="dialogFormVisible"
+    >
       <!-- 表单el-form 
            model收集表单数据存放于那个对象 
       -->
@@ -136,41 +140,44 @@ export default {
   mounted() {
     //获取列表数据方法
     this.getPageList();
-    console.log(this.$API);
   },
   methods: {
-    //获取表格数据
-    async getPageList() {
+    //获取表格数据(如果不传入参数默认第一页)
+    async getPageList(page = 1) {
       //解构参数
-      const { page, limit } = this;
+      //const { page, limit } = this;
       //获取品牌列表接口
-      let res = await this.$API.trademark.reqTreadeMark(page, limit);
+      let res = await this.$API.trademark.reqTreadeMark(page, this.limit);
       if (res.code == 200) {
-        let { data } = res;
+        let { data } = res; //解构
         this.total = data.total;
         this.list = data.records;
       }
-      console.log(res);
     },
     //点击页数
     handleCurrentChange(pager) {
+      //pager为当前页数
       console.log(pager);
-      this.page = pager;
-      this.getPageList();
+      this.page = pager; //赋值给分页器第几页
+      this.getPageList(pager); //调用显示列表接口
     },
     //点击显示条数
     handleSizeChange(limit) {
       this.limit = limit;
       this.getPageList();
     },
-    //增加方法
+    //显示对话框方法
     showDialog() {
+      //每次显示对话框都将数据清楚
       this.dialogFormVisible = true;
       this.tmFrom.tmName = "";
       this.tmFrom.logoUrl = "";
+      this.tmFrom.id = "";
     },
     //修改方法
-    update() {
+    update(row) {
+      //row是当前选中行的信息
+      this.tmFrom = JSON.parse(JSON.stringify(row)); //深拷贝数据(双向绑定,不进行深拷贝会导致数据修改同步变化)
       this.dialogFormVisible = true;
     },
     //上传成功的回调
@@ -194,16 +201,17 @@ export default {
       }
       return isJPG && isLt2M;
     },
+    //新增修改接口
     async addOrUpdate() {
-      this.dialogFormVisible = false;
-      let res = await this.$API.trademark.reqAdd(this.tmFrom);
-      console.log(res);
+      this.dialogFormVisible = false; //关闭对话框
+      let res = await this.$API.trademark.reqAdd(this.tmFrom); //调用接口
       if (res.code == 200) {
         //弹出信息
-        this.$message(this.tmFrom.id ? "修改成功" : "添加成功");
-        //再次获取数据
-        this.getPageList();
+        this.$message.success(this.tmFrom.id ? "修改成功" : "添加成功");
+        //再次获取数据(如果是修改就刷新显示当前页,如果是新增就显示第一页)
+        this.getPageList(this.tmFrom.id ? this.page : 1);
       }
+      this.tmFrom.id = "";
     },
   },
 };
