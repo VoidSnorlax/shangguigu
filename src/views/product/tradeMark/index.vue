@@ -79,11 +79,11 @@
       <!-- 表单el-form 
            model收集表单数据存放于那个对象 
       -->
-      <el-form style="width: 80%" :model="tmFrom">
-        <el-form-item label="品牌名称" label-width="100px">
+      <el-form style="width: 80%" :model="tmFrom" :rules="rules" ref="ruleForm">
+        <el-form-item label="品牌名称" label-width="100px" prop="tmName">
           <el-input autocomplete="off" v-model="tmFrom.tmName"></el-input>
         </el-form-item>
-        <el-form-item label="品牌LOGO" label-width="100px">
+        <el-form-item label="品牌LOGO" label-width="100px" prop="logoUrl">
           <!-- 上传组件不能使用 v-model
                action:设置图片上传地址
                on-success:图片上传成功的回调
@@ -100,7 +100,7 @@
             <img v-if="tmFrom.logoUrl" :src="tmFrom.logoUrl" class="avatar" />
             <i v-else class="el-icon-plus avatar-uploader-icon"></i>
             <div slot="tip" class="el-upload__tip">
-              只能上传jpg/png文件，且不超过500kb
+              只能上传jpg/png文件,且不超过500kb
             </div>
           </el-upload>
         </el-form-item>
@@ -134,6 +134,15 @@ export default {
       tmFrom: {
         tmName: "",
         logoUrl: "",
+      },
+      tmFromFrom: {}, //备份数据
+      //验证规则
+      rules: {
+        tmName: [
+          { required: true, message: "请输入品牌名称", trigger: "blur" },
+          { min: 2, max: 5, message: "长度在 2 到 5 个字符", trigger: "blur" },
+        ],
+        logoUrl: [{ required: true, message: "请上传LOGO图片" }],
       },
     };
   },
@@ -178,6 +187,7 @@ export default {
     update(row) {
       //row是当前选中行的信息
       this.tmFrom = JSON.parse(JSON.stringify(row)); //深拷贝数据(双向绑定,不进行深拷贝会导致数据修改同步变化)
+      this.tmFromFrom = JSON.parse(JSON.stringify(row));
       this.dialogFormVisible = true;
     },
     //上传成功的回调
@@ -202,16 +212,30 @@ export default {
       return isJPG && isLt2M;
     },
     //新增修改接口
-    async addOrUpdate() {
-      this.dialogFormVisible = false; //关闭对话框
-      let res = await this.$API.trademark.reqAdd(this.tmFrom); //调用接口
-      if (res.code == 200) {
-        //弹出信息
-        this.$message.success(this.tmFrom.id ? "修改成功" : "添加成功");
-        //再次获取数据(如果是修改就刷新显示当前页,如果是新增就显示第一页)
-        this.getPageList(this.tmFrom.id ? this.page : 1);
+    addOrUpdate() {
+      //如果数据没有发生修改,直接关闭对话框,不进行任何操作(将数据进行备份,判断两个数据是否相等)
+      if (JSON.stringify(this.tmFromFrom) === JSON.stringify(this.tmFrom)) {
+        this.dialogFormVisible = false;
+        return true;
       }
-      this.tmFrom.id = "";
+      //调用表单自带的验证方法(传入一个回调函数)
+      this.$refs.ruleForm.validate(async (success) => {
+        //如果通过验证
+        if (success) {
+          this.dialogFormVisible = false; //关闭对话框
+          let res = await this.$API.trademark.reqAdd(this.tmFrom); //调用接口
+          if (res.code == 200) {
+            //弹出信息
+            this.$message.success(this.tmFrom.id ? "修改成功" : "添加成功");
+            //再次获取数据(如果是修改就刷新显示当前页,如果是新增就显示第一页)
+            this.getPageList(this.tmFrom.id ? this.page : 1);
+          }
+          this.tmFrom.id = "";
+        } else {
+          console.log("error submit!!");
+          return false;
+        }
+      });
     },
   },
 };
