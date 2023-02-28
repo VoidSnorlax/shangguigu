@@ -9,7 +9,10 @@ export const reqTreadeMark = (page, limit) => {
   });
 };
 //新增品牌接口
+//修改品牌接口
+//修改品牌需要提交ID属性
 //注意:新增品牌不需要传递ID,ID是服务器生成的
+//新增与修公用一个接口区别在于是否有ID
 export const reqAdd = (tradeMark) => {
   //如果有ID就是更新方法
   if (tradeMark.id) {
@@ -27,6 +30,10 @@ export const reqAdd = (tradeMark) => {
     });
   }
 };
-
-//修改品牌接口
-//修改品牌需要提交ID属性
+//删除接口
+export const del = (id) => {
+  return request({
+    url: `list-api/admin/product/baseTrademark/remove/${id}`,
+    method: "delete",
+  });
+};

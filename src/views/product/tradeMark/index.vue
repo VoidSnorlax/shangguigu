@@ -43,7 +43,11 @@
             icon="el-icon-edit"
             >操作</el-button
           >
-          <el-button type="danger" size="mini" @click="" icon="el-icon-delete"
+          <el-button
+            type="danger"
+            size="mini"
+            @click="del(row)"
+            icon="el-icon-delete"
             >删除</el-button
           >
         </template>
@@ -236,6 +240,32 @@ export default {
           return false;
         }
       });
+    },
+    //删除功能
+    del(row) {
+      //调用UI组件弹框
+      this.$confirm(`是否删除${row.tmName}`, "删除", {
+        distinguishCancelAndClose: true,
+        confirmButtonText: "删除",
+        cancelButtonText: "取消",
+      })
+        .then(async () => {
+          let res = await this.$API.trademark.del(row.id); //调用删除接口(传入ID)
+          if (res.code == 200) {
+            this.$message({
+              type: "success",
+              message: "删除成功",
+            });
+            //刷新页面(如果数据大于1,显示本页,如果小于1显示上一页)
+            this.getPageList(this.list.length > 1 ? this.page : this.page - 1);
+          }
+        })
+        .catch((action) => {
+          this.$message({
+            type: "info",
+            message: "取消删除",
+          });
+        });
     },
   },
 };
