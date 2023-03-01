@@ -81,10 +81,16 @@
       :visible.sync="dialogFormVisible"
     >
       <!-- 表单el-form 
-           model收集表单数据存放于那个对象 
+           model收集表单数据存放于那个对象
+           rules定义表单规则(规范用户输入) 
       -->
       <el-form style="width: 80%" :model="tmFrom" :rules="rules" ref="ruleForm">
+        <!--el-form-item表单的每一项
+            label名称
+            prop与规则对象名对应(:rules="rules",rules对象里的属性)   
+         -->
         <el-form-item label="品牌名称" label-width="100px" prop="tmName">
+          <!--v-model双向数据绑定收集到表单绑定的数据对象中(:model="tmFrom")  -->
           <el-input autocomplete="off" v-model="tmFrom.tmName"></el-input>
         </el-form-item>
         <el-form-item label="品牌LOGO" label-width="100px" prop="logoUrl">
@@ -199,7 +205,6 @@ export default {
       //res:上传成功之后返回给前端的数据
       //file:上传成功后服务器返回的数据
       this.imageUrl = URL.createObjectURL(file.raw);
-      console.log(res);
       this.tmFrom.logoUrl = res.data;
     },
     //上传之前的回调
@@ -246,11 +251,12 @@ export default {
       //调用UI组件弹框
       this.$confirm(`是否删除${row.tmName}`, "删除", {
         distinguishCancelAndClose: true,
-        confirmButtonText: "删除",
-        cancelButtonText: "取消",
+        confirmButtonText: "删除",//确定按钮
+        cancelButtonText: "取消",//取消按钮
       })
         .then(async () => {
           let res = await this.$API.trademark.del(row.id); //调用删除接口(传入ID)
+          //如果成功提示用户
           if (res.code == 200) {
             this.$message({
               type: "success",
@@ -260,6 +266,7 @@ export default {
             this.getPageList(this.list.length > 1 ? this.page : this.page - 1);
           }
         })
+        //取消删除
         .catch((action) => {
           this.$message({
             type: "info",
