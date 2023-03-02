@@ -88,13 +88,24 @@
             label="属性值名称"
             width="col.width"
           >
-            <template slot-scope="{ row, index }">
+            <template slot-scope="{ row, $index }">
+              <!-- 
+                通过v-if控制编辑与查看
+                通过给 ref="$index" 获取每一个input标签
+              -->
               <el-input
                 v-model="row.valueName"
                 placeholder="请输入名称"
                 size="mini"
                 clearable
+                v-if="row.flag"
+                @blur="look(row)"
+                :ref="$index"
               ></el-input>
+              <!-- 添加一个默认高度(防止用户没有输入值后无法重新添加(解决空值问题)) -->
+              <div v-else @click="showInput(row, $index)" style="height: 30px">
+                {{ row.valueName }}
+              </div>
             </template>
           </el-table-column>
           <el-table-column prop="col.id" label="操作" width="col.width">
@@ -117,6 +128,8 @@
 </template>
 
 <script>
+import { nextTick } from "process";
+
 export default {
   name: "Attr",
   data() {
@@ -162,10 +175,14 @@ export default {
     },
     //新增属性值
     addNew() {
-      //每点击一次新增表格增加一行(向表格绑定的数组中push数据)
+      //每点击一次新增表格增加一行(向表格绑定的数组中push数据(vue中数组的push方法经过重新可以直接添加响应式数据))
       this.attrInfo.attrValueList.push({
         attrId: undefined, //对应属性名ID(新增默认没有id,id有后端创建)
         valueName: "", //属性值名
+        flag: true, //控制表格化显示(span标签)或者编辑(input标签)
+      });
+      this.$nextTick(() => {
+        this.$refs[this.attrInfo.attrValueList.length - 1].focus();
       });
     },
     //新增属性
@@ -183,8 +200,43 @@ export default {
     insertAttr(row) {
       /* 修改属性要显示当前已有的数据(通过重新赋值深拷贝的方法) */
       this.showthis = false; //关闭显示
-      console.log(row);
       this.attrInfo = JSON.parse(JSON.stringify(row)); //深拷贝对象
+      //修改属性添加编辑模式
+      this.attrInfo.attrValueList.forEach((item, index) => {
+        //因为vue无法检测数组的新增(调用$set方法),保证其响应式
+        this.$set(item, "flag", false);
+      });
+    },
+    //表格行编辑模式
+    look(row) {
+      //判断用户输入是否为空
+      if (row.valueName.trim() == "") {
+        this.$message.warning("请输入正确的属性值"); //提示用户
+        return;
+      }
+      //判断用户输入是否有重复
+      let res = this.attrInfo.attrValueList.some((item, index) => {
+        //row是新改变的数据
+        if (row != item) {
+          return row.valueName.trim() == item.valueName.trim(); //判断是否有重复
+        }
+      });
+      //如果有重复跳出函数
+      if (res) return;
+      row.flag = false; //失去焦点为查看模式
+    },
+    //表格行查看模式
+    showInput(row, $index) {
+      row.flag = true; //显示输入框
+      console.log($index);
+      /* 
+        注意:点击div(查看模式)的时候,切换input变为编辑模式,需要注意,对于浏览器而言,重绘与重排消耗时间,
+        v-if是将标签直接从DOM树上移除
+        因此我们不能立马获取input标签
+      */
+      this.$nextTick(() => {
+        this.$refs[$index].focus();
+      });
     },
   },
 };
