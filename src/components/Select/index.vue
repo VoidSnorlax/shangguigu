@@ -6,6 +6,7 @@
           placeholder="一级品牌"
           v-model="categoryID.category1Id"
           @change="getCategory2"
+          :disabled="show"
         >
           <!-- value:v-model通过value获取值在绑定到model中 -->
           <el-option
@@ -21,6 +22,7 @@
           placeholder="二级品牌"
           v-model="categoryID.category2Id"
           @change="getCategory3"
+          :disabled="show"
         >
           <el-option
             :label="item.name"
@@ -35,6 +37,7 @@
           placeholder="三级品牌"
           v-model="categoryID.category3Id"
           @change="getall"
+          :disabled="show"
         >
           <el-option
             :label="item.name"
@@ -51,6 +54,7 @@
 <script>
 export default {
   name: "CreateSelect",
+  props: ["show"], //接受父组件传入的值用来控制三级联动的显示
   data() {
     return {
       list1: [], //一级分类数据
@@ -66,6 +70,7 @@ export default {
   },
   mounted() {
     this.getCategory1(); //在页面组件挂载完成就获取一级分类数据
+    console.log(this.show);
   },
   methods: {
     //获取一级分类数据
@@ -77,16 +82,16 @@ export default {
     },
     //触发一级分类下拉框
     async getCategory2() {
-      /* 
+      /*
       一级分类数据改变
       将二级三级联动的数据先置空
-      并将ID也置空 
+      并将ID也置空
       */
       this.list2 = [];
       this.list3 = [];
       this.categoryID.category2Id = "";
       this.categoryID.category3Id = "";
-      this.$emit("getID", { ID: this.categoryID.category1Id, leave: 1 });//触发自定义事件
+      this.$emit("getID", { ID: this.categoryID.category1Id, leave: 1 }); //触发自定义事件
       let { category1Id } = this.categoryID; //解构一级分类产品ID
       let res = await this.$API.attr.category2(category1Id);
       if (res.code == 200) {

@@ -2,7 +2,7 @@
   <div class="">
     <el-card class="box-card" style="margin-bottom: 10px">
       <!-- 引入三级联动组件 -->
-      <CreateSelect @getID="getID"></CreateSelect>
+      <CreateSelect @getID="getID" :show="!showthis"></CreateSelect>
     </el-card>
 
     <el-card class="box-card">
@@ -109,18 +109,33 @@
             </template>
           </el-table-column>
           <el-table-column prop="col.id" label="操作" width="col.width">
-            <template slot-scope="{ row, index }">
-              <el-button
-                type="danger"
-                size="mini"
-                @click=""
-                icon="el-icon-delete"
-              ></el-button>
+            <template slot-scope="{ row, $index }">
+              <!-- 
+                el-popconfirm气泡框
+                title提示框
+                @confirm确定事件回调 
+              -->
+              <el-popconfirm
+                :title="'删除' + row.valueName + '?'"
+                @onConfirm="del($index)"
+              >
+                <el-button
+                  type="danger"
+                  size="mini"
+                  icon="el-icon-delete"
+                  slot="reference"
+                ></el-button>
+              </el-popconfirm>
             </template>
           </el-table-column>
         </el-table>
 
-        <el-button type="primary">保存</el-button>
+        <el-button
+          type="primary"
+          @click="save"
+          :disabled="attrInfo.attrValueList.length < 1"
+          >保存</el-button
+        >
         <el-button @click="showthis = true">取消</el-button>
       </div>
     </el-card>
@@ -138,7 +153,7 @@ export default {
       id2: "", //二级分类产品ID
       id3: "", //三级分类产品ID
       dataList: [], //属性列表
-      showthis: true, //表格显示
+      showthis: true, //表格显示(true),编辑模块显示(false)
       attrInfo: {
         attrName: "", //属性名
         //属性值列表
@@ -181,6 +196,7 @@ export default {
         valueName: "", //属性值名
         flag: true, //控制表格化显示(span标签)或者编辑(input标签)
       });
+      //对新添加的编辑行自动聚焦
       this.$nextTick(() => {
         this.$refs[this.attrInfo.attrValueList.length - 1].focus();
       });
@@ -198,7 +214,11 @@ export default {
     },
     //修改属性
     insertAttr(row) {
-      /* 修改属性要显示当前已有的数据(通过重新赋值深拷贝的方法) */
+      /* 
+        1.关闭展示表格切换为编辑模式
+        2.修改属性要显示当前已有的数据(通过重新赋值深拷贝的方法)
+        3.往每一个对象中添加一个flag属性,以便于后面进行数据操作
+      */
       this.showthis = false; //关闭显示
       this.attrInfo = JSON.parse(JSON.stringify(row)); //深拷贝对象
       //修改属性添加编辑模式
@@ -209,6 +229,12 @@ export default {
     },
     //表格行编辑模式
     look(row) {
+      /* 
+        1.在input组件上绑定一个聚焦事件
+        2.通过回调获取表格行的数据
+        3.对用户输入的数据进行过滤
+        4.失去焦点切换为查看模式
+      */
       //判断用户输入是否为空
       if (row.valueName.trim() == "") {
         this.$message.warning("请输入正确的属性值"); //提示用户
@@ -227,16 +253,65 @@ export default {
     },
     //表格行查看模式
     showInput(row, $index) {
+      /* 
+        1.在div上绑定一个点击的回调事件
+        2.通过回调事件获取表格行绑定的数据
+        3.显示输入框
+        4.通过nextTick API 获取input组件的聚焦
+      */
       row.flag = true; //显示输入框
-      console.log($index);
       /* 
         注意:点击div(查看模式)的时候,切换input变为编辑模式,需要注意,对于浏览器而言,重绘与重排消耗时间,
         v-if是将标签直接从DOM树上移除
         因此我们不能立马获取input标签
       */
       this.$nextTick(() => {
-        this.$refs[$index].focus();
+        this.$refs[$index].focus(); //调用input组件的聚焦方法
       });
+    },
+    //删除属性值
+    del(index) {
+      /* 
+        1.通过获取表格行的索引进行逻辑删除
+      */
+      this.attrInfo.attrValueList.splice(index, 1); //通过传入的下标删除数据
+    },
+    //提交修改
+    async save() {
+      /* 
+        1.整理提交的数据
+        2.调用提交接口
+        3.给用户提示信息
+        4.关闭修改界面打开展示界面
+        5.重新获取数据
+      */
+
+      //过滤掉flag字段(flag字段为自己添加的不需要提供给后端)
+      this.attrInfo.attrValueList = this.attrInfo.attrValueList.filter(
+        (item, index) => {
+          return item.valueName != "";
+        }
+      );
+      //整理需要的字段
+      this.attrInfo.attrValueList = this.attrInfo.attrValueList.map(
+        (item, index) => {
+          return {
+            attrId: item.attrId,
+            valueName: item.valueName,
+            id: item.id,
+          };
+        }
+      );
+
+      try {
+        let res = await this.$API.attr.saveAttrInfo(this.attrInfo); //调用提交接口
+        console.log(res);
+        this.showthis = true; //关闭修改界面
+        this.$message.success("添加成功"); //提示用户信息
+        this.getall(); //重新获取数据
+      } catch (error) {
+        this.$message.error("失败");
+      }
     },
   },
 };
