@@ -32,8 +32,10 @@ if (process.env.NODE_ENV === "production") {
 Vue.use(ElementUI, { locale });
 // 如果想要中文版 element-ui，按如下方式声明
 // Vue.use(ElementUI)
-import CreateSelect from "@/components/Select/index.vue";//引入组件(三级联动)
-Vue.component(CreateSelect.name, CreateSelect);//注册为全局组件
+import CreateSelect from "@/components/Select/index.vue"; //引入组件(三级联动)
+import Hitbutton from "@/components/Hitbutton/index.vue";
+Vue.component(CreateSelect.name, CreateSelect); //注册为全局组件
+Vue.component(Hitbutton.name, Hitbutton);
 Vue.config.productionTip = false;
 //引入API请求接口函数
 import API from "@/api";

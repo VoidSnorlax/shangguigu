@@ -2,7 +2,7 @@
   <div class="">
     <el-card class="box-card" style="margin-bottom: 10px">
       <!-- 引入三级联动组件 -->
-      <CreateSelect @getID="getID" :show="!showthis"></CreateSelect>
+      <CreateSelect @getID="getID" :show="!showthis" style="text-align: center;"></CreateSelect>
     </el-card>
 
     <el-card class="box-card">
