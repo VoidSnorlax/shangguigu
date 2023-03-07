@@ -4,12 +4,15 @@
       <CreateSelect @getID="getID" :show="!showthis"></CreateSelect>
     </el-card>
     <el-card shadow="always">
-      <div>
+      <!-- Sku列表展示 -->
+      <div v-show="show == 0">
         <el-button
           type="primary"
           size="default"
           icon="el-icon-plus"
           style="margin: 10px"
+          :disabled="!category3Id"
+          @click="addSpu"
           >Sku增加</el-button
         >
         <el-table :data="records" border stripe style="width: 100%">
@@ -50,11 +53,17 @@
         >
         </el-pagination>
       </div>
+      <!-- 添加或者修改SPU -->
+      <Spuform v-show="show == 1"></Spuform>
+      <!-- 添加Sku -->
+      <Skuform v-show="show == 2"></Skuform>
     </el-card>
   </div>
 </template>
 
 <script>
+import Skuform from "./Skuform";
+import Spuform from "./Spuform";
 export default {
   name: "Sku",
   data() {
@@ -68,20 +77,23 @@ export default {
       limit: 6, //每一页多少条
       records: [], //获取数据
       total: 0, //分页器一共需要多少数据
+      show: 0, //控制显示组件(0:Sku列表展示,1:添加或者修改SPU,2:添加Sku)
     };
   },
   methods: {
+    //获取列表数据
     async getList(pages = 1) {
       this.page = pages;
-      let { page, limit, category3Id } = this;
-      let res = await this.$API.sku.getProduct(page, limit, category3Id);
-      console.log(res);
+      let { page, limit, category3Id } = this; //解构出需要的参数
+      let res = await this.$API.sku.getProduct(page, limit, category3Id); //发送请求
       if (res.code == 200) {
         this.total = res.data.total;
         this.records = res.data.records;
       }
     },
+    //自定义事件(获取子组件CreateSelect传入的分类产品ID)
     getID({ ID, leave }) {
+      /* 当第三个下拉菜单触发时传入对应的ID,调用获取方法 */
       if (leave == 1) {
         this.id1 = ID;
         this.id2 = "";
@@ -94,10 +106,18 @@ export default {
         this.getList();
       }
     },
+    //点击改变显示数量
     handleSizeChange(limt) {
       this.limit = limt;
       this.getList();
     },
+    addSpu() {
+      this.show = 1;
+    },
+  },
+  components: {
+    Skuform,
+    Spuform,
   },
 };
 </script>
