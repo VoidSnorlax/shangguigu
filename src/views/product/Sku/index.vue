@@ -6,6 +6,7 @@
     <el-card shadow="always">
       <!-- Sku列表展示 -->
       <div v-show="show == 0">
+        <!-- 增加按钮 -->
         <el-button
           type="primary"
           size="default"
@@ -15,6 +16,7 @@
           @click="addSpu"
           >Sku增加</el-button
         >
+        <!-- 数据展示表格 -->
         <el-table :data="records" border stripe style="width: 100%">
           <el-table-column label="序号" type="index" width="80" align="center">
           </el-table-column>
@@ -34,13 +36,35 @@
           </el-table-column>
           <el-table-column label="操作" width="col.width" prop="attrValueList">
             <template slot-scope="{ row, $index }">
-              <el-button type="primary" size="mini"></el-button>
-              <el-button type="success" size="mini"></el-button>
-              <el-button type="warning" size="mini"></el-button>
-              <el-button type="primary" size="mini"></el-button>
+              <Hitbutton
+                type="primary"
+                size="mini"
+                icon="el-icon-plus"
+                :title="name[0]"
+              ></Hitbutton>
+              <Hitbutton
+                type="success"
+                size="mini"
+                icon="el-icon-edit"
+                :title="name[1]"
+                @click="updateSpu(row)"
+              ></Hitbutton>
+              <Hitbutton
+                type="warning"
+                size="mini"
+                icon="el-icon-delete"
+                :title="name[2]"
+              ></Hitbutton>
+              <Hitbutton
+                type="info"
+                size="mini"
+                icon="el-icon-warning"
+                :title="name[3]"
+              ></Hitbutton>
             </template>
           </el-table-column>
         </el-table>
+        <!-- 分页器 -->
         <el-pagination
           :current-page="1"
           :page-size="limit"
@@ -54,7 +78,7 @@
         </el-pagination>
       </div>
       <!-- 添加或者修改SPU -->
-      <Spuform v-show="show == 1"></Spuform>
+      <Spuform v-show="show == 1" @cacel="cacel" ref="spf"></Spuform>
       <!-- 添加Sku -->
       <Skuform v-show="show == 2"></Skuform>
     </el-card>
@@ -74,10 +98,11 @@ export default {
       category3Id: "", //三级分类产品ID
       dataList: [],
       page: 1, //分页器当前第几页
-      limit: 6, //每一页多少条
+      limit: 3, //每一页多少条
       records: [], //获取数据
       total: 0, //分页器一共需要多少数据
       show: 0, //控制显示组件(0:Sku列表展示,1:添加或者修改SPU,2:添加Sku)
+      name: ["操作", "更新", "删除", "信息"],
     };
   },
   methods: {
@@ -111,8 +136,22 @@ export default {
       this.limit = limt;
       this.getList();
     },
+    //Sku增加
     addSpu() {
       this.show = 1;
+    },
+    //自定义事件(子组件触发用于从编辑模式回到展示数据模式)
+    cacel(num) {
+      /* 
+        1.接受子组件传来的数据
+        2.改变显示值(show)
+      */
+      this.show = num;
+    },
+    //修改Sku
+    updateSpu(row) {
+      this.show = 1; //显示编辑模式
+      this.$refs.spf.initSpudata(row); //在父组件直接调用子组件方法(initSpudata)传入每一行的数据
     },
   },
   components: {
