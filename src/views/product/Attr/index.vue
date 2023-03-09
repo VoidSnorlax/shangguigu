@@ -2,9 +2,12 @@
   <div class="">
     <el-card class="box-card" style="margin-bottom: 10px">
       <!-- 引入三级联动组件 -->
-      <CreateSelect @getID="getID" :show="!showthis" style="text-align: center;"></CreateSelect>
+      <CreateSelect
+        @getID="getID"
+        :show="!showthis"
+        style="text-align: center"
+      ></CreateSelect>
     </el-card>
-
     <el-card class="box-card">
       <!-- v-show="showthis"控制表格或者添加表单的显示 -->
       <!-- 显示全部属性表格 -->
@@ -91,6 +94,7 @@
             <template slot-scope="{ row, $index }">
               <!-- 
                 通过v-if控制编辑与查看
+                不能在data中定义控制标记(这会导致所有行都会被影响,一个改变全都改变)
                 通过给 ref="$index" 获取每一个input标签
               -->
               <el-input
@@ -236,13 +240,23 @@ export default {
         4.失去焦点切换为查看模式
       */
       //判断用户输入是否为空
+      console.log(row);
       if (row.valueName.trim() == "") {
         this.$message.warning("请输入正确的属性值"); //提示用户
         return;
       }
       //判断用户输入是否有重复
+      /* 
+        这里的逻辑:
+        1.input框失去焦点时,触发look回调函数,通过回调函数获取新增行的数据
+        2.调用some方法
+          2.1因为some方法是:只要有一项满足回调函数测试就return
+          2.2所有row是新增到数组中的(前面的plusAttr()方法),row也会出现在数组里
+          2.3所以要让row与之前的数据进行操作比较
+          2.4row!=item
+            2.4.1进行业务逻辑书写
+      */
       let res = this.attrInfo.attrValueList.some((item, index) => {
-        //row是新改变的数据
         if (row != item) {
           return row.valueName.trim() == item.valueName.trim(); //判断是否有重复
         }
