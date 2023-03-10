@@ -40,3 +40,19 @@ export const getBaseSaleAttrList = () => {
   });
 };
 
+//保存或者新增接口
+export const reqSaveOrUpdate = (spu) => {
+  if (spu.id) {
+    return request({
+      url: "list-api/admin/product/updateSpuInfo",
+      method: "post",
+      data: spu,
+    });
+  } else {
+    return request({
+      url: "list-api/admin/product/saveSpuInfo",
+      method: "post",
+      data: spu,
+    });
+  }
+};

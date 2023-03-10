@@ -1,7 +1,7 @@
 <template>
   <div class="">
     <el-card shadow="always" style="margin: 10px">
-      <CreateSelect @getID="getID" :show="!showthis"></CreateSelect>
+      <CreateSelect @getID="getID" :show="show !== 0"></CreateSelect>
     </el-card>
     <el-card shadow="always">
       <!-- Sku列表展示 -->

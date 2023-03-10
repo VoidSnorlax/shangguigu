@@ -240,7 +240,6 @@ export default {
         4.失去焦点切换为查看模式
       */
       //判断用户输入是否为空
-      console.log(row);
       if (row.valueName.trim() == "") {
         this.$message.warning("请输入正确的属性值"); //提示用户
         return;

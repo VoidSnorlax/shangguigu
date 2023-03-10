@@ -81,10 +81,10 @@
             <template slot-scope="{ row, $index }">
               <el-tag
                 :key="tag.id"
-                v-for="tag in row.spuSaleAttrValueList"
+                v-for="(tag, index) in row.spuSaleAttrValueList"
                 closable
                 :disable-transitions="false"
-                @close="handleClose(tag)"
+                @close="handleClose(row, index)"
                 style="margin: 3px"
               >
                 {{ tag.saleAttrValueName }}
@@ -96,12 +96,18 @@
               <el-input
                 class="input-new-tag"
                 v-if="row.flag"
-                v-model="row.saleAttrValueName"
+                v-model="row.inputvalue"
                 ref="saveTagInput"
                 size="small"
+                style="width: 50px"
+                @blur="handleInputConfirm(row)"
               >
               </el-input>
-              <el-button v-else class="button-new-tag" size="small" @click=""
+              <el-button
+                v-else
+                class="button-new-tag"
+                size="small"
+                @click="addAttrValue(row)"
                 >+ 添加</el-button
               >
             </template>
@@ -113,6 +119,7 @@
                   type="danger"
                   size="mini"
                   icon="el-icon-delete"
+                  @click="spu.spuSaleAttrList.splice($index, 1)"
                 ></el-button>
               </div>
             </template>
@@ -148,14 +155,7 @@ export default {
         tmId: "", //品牌ID
         id: 0,
         /* 收集图片信息 */
-        spuImageList: [
-          {
-            id: 0,
-            imgName: "",
-            imgUrl: "",
-            spuId: 0,
-          },
-        ],
+        spuImageList: [],
         /* 平台属性与属性值 */
         spuSaleAttrList: [
           {
@@ -185,7 +185,19 @@ export default {
     };
   },
   methods: {
-    onSubmit() {},
+    async onSubmit() {
+      this.spu.spuImageList = this.spuImageList.map((item, index) => {
+        return {
+          imgName: item.name,
+          imgUrl: item.url,
+        };
+      });
+      let res = await this.$API.sku.reqSaveOrUpdate(this.spu);
+      if (res.code == 200) {
+        this.$message.success("添加完成");
+        this.$emit("cacel", 0);
+      }
+    },
     //初始化表单
     async initSpudata(row) {
       let { id } = row; //从父组件中解构出row(row为每一行的属性)
@@ -223,13 +235,48 @@ export default {
     },
     handleAvatarSuccess(response, file, fileList) {
       this.spuImageList = fileList;
+      console.log(file);
+      file.url = response.data;
     },
-    handleClose() {},
+    handleClose(row, index) {
+      row.spuSaleAttrValueList.splice(index, 1);
+    },
     addData() {
       let [baseSaleAttrId, saleAttrName] = this.attrID.split(":");
       let obj = { baseSaleAttrId, saleAttrName, spuSaleAttrValueList: [] };
       this.spu.spuSaleAttrList.push(obj);
       this.attrID = "";
+    },
+    addAttrValue(row) {
+      this.$set(row, "flag", "true");
+      this.$set(row, "inputvalue", "");
+      this.$nextTick(() => {
+        this.$refs.saveTagInput.focus();
+      });
+
+      //
+    },
+    handleInputConfirm(row) {
+      row.flag = false;
+      let { baseSaleAttrId, saleAttrName, spuId, inputvalue } = row;
+      if (inputvalue.trim() == "") {
+        this.$message.warning("请输入正确的属性值");
+        return;
+      }
+      let res = (row.spuSaleAttrValueList || []).some((item, index) => {
+        return item.saleAttrValueName == inputvalue;
+      });
+      if (res) {
+        this.$message.warning("不允许有重复的值");
+        return;
+      }
+      let obj = {
+        baseSaleAttrId,
+        saleAttrName,
+        spuId,
+        saleAttrValueName: inputvalue,
+      };
+      row.spuSaleAttrValueList.push(obj);
     },
   },
   computed: {
