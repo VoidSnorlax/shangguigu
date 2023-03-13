@@ -41,6 +41,7 @@
                 size="mini"
                 icon="el-icon-plus"
                 :title="name[0]"
+                @click="optionSku(row)"
               ></Hitbutton>
               <Hitbutton
                 type="success"
@@ -49,12 +50,19 @@
                 :title="name[1]"
                 @click="updateSpu(row)"
               ></Hitbutton>
-              <Hitbutton
-                type="warning"
-                size="mini"
-                icon="el-icon-delete"
-                :title="name[2]"
-              ></Hitbutton>
+              <el-popconfirm
+                title="这是一段内容确定删除吗？"
+                @onConfirm="del(row)"
+              >
+                <Hitbutton
+                  type="warning"
+                  size="mini"
+                  icon="el-icon-delete"
+                  :title="name[2]"
+                  slot="reference"
+                ></Hitbutton>
+              </el-popconfirm>
+
               <Hitbutton
                 type="info"
                 size="mini"
@@ -80,7 +88,7 @@
       <!-- 添加或者修改SPU -->
       <Spuform v-show="show == 1" @cacel="cacel" ref="spf"></Spuform>
       <!-- 添加Sku -->
-      <Skuform v-show="show == 2"></Skuform>
+      <Skuform v-show="show == 2" ref="skf"></Skuform>
     </el-card>
   </div>
 </template>
@@ -139,19 +147,38 @@ export default {
     //Sku增加
     addSpu() {
       this.show = 1;
+      this.$refs.spf.addSku(this.category3Id);
     },
     //自定义事件(子组件触发用于从编辑模式回到展示数据模式)
-    cacel(num) {
-      /* 
+    cacel({ sence, flag }) {
+      /*
         1.接受子组件传来的数据
         2.改变显示值(show)
       */
-      this.show = num;
+      this.show = sence;
+      if (flag == "修改") {
+        this.getList(this.page);
+      } else {
+        this.getList();
+      }
     },
     //修改Sku
     updateSpu(row) {
       this.show = 1; //显示编辑模式
       this.$refs.spf.initSpudata(row); //在父组件直接调用子组件方法(initSpudata)传入每一行的数据
+    },
+    async del(row) {
+      console.log(111);
+      let { id } = row;
+      let res = await this.$API.sku.delSpu(id);
+      if (res.code == 200) {
+        this.$message.success("删除成功");
+        this.getList(this.records.length > 1 ? this.page : this.page - 1);
+      }
+    },
+    optionSku(row) {
+      this.show = 2;
+      this.$refs.skf.initSkuData(this.id1, this.id2, row);
     },
   },
   components: {

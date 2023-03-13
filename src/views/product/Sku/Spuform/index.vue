@@ -129,7 +129,7 @@
 
       <el-form-item>
         <el-button type="primary" @click="onSubmit">保存</el-button>
-        <el-button @click="$emit('cacel', 0)">取消</el-button>
+        <el-button @click="cancle">取消</el-button>
       </el-form-item>
     </el-form>
   </div>
@@ -157,24 +157,7 @@ export default {
         /* 收集图片信息 */
         spuImageList: [],
         /* 平台属性与属性值 */
-        spuSaleAttrList: [
-          {
-            baseSaleAttrId: 0,
-            id: 0,
-            saleAttrName: "",
-            spuId: 0,
-            spuSaleAttrValueList: [
-              {
-                baseSaleAttrId: 0,
-                id: 0,
-                isChecked: "",
-                saleAttrName: "",
-                saleAttrValueName: "",
-                spuId: 0,
-              },
-            ],
-          },
-        ],
+        spuSaleAttrList: [],
       },
       spuImageList: [], //照片墙数据
       TrademarkList: [], //品牌数据
@@ -195,8 +178,9 @@ export default {
       let res = await this.$API.sku.reqSaveOrUpdate(this.spu);
       if (res.code == 200) {
         this.$message.success("添加完成");
-        this.$emit("cacel", 0);
+        this.$emit("cacel", { sence: 0, flag: this.spu.id ? "修改" : "增加" });
       }
+      Object.assign(this._data, this.$options.data());
     },
     //初始化表单
     async initSpudata(row) {
@@ -225,7 +209,6 @@ export default {
         this.BaseSaleAttrList = BaseSaleAttrList.data;
       }
     },
-    //
     handlePictureCardPreview(file) {
       this.imgUrl = file.url;
       this.dialogVisible = true;
@@ -277,6 +260,21 @@ export default {
         saleAttrValueName: inputvalue,
       };
       row.spuSaleAttrValueList.push(obj);
+    },
+    async addSku(ID) {
+      this.spu.category3Id = ID;
+      let TrademarkListData = await this.$API.sku.getTrademarkList();
+      if (TrademarkListData.code == 200) {
+        this.TrademarkList = TrademarkListData.data;
+      }
+      let BaseSaleAttrList = await this.$API.sku.getBaseSaleAttrList();
+      if (BaseSaleAttrList.code == 200) {
+        this.BaseSaleAttrList = BaseSaleAttrList.data;
+      }
+    },
+    cancle() {
+      this.$emit("cacel", { sence: 0, flag: this.spu.id ? "修改" : "增加" });
+      Object.assign(this._data, this.$options.data());
     },
   },
   computed: {

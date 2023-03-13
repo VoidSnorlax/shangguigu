@@ -56,3 +56,10 @@ export const reqSaveOrUpdate = (spu) => {
     });
   }
 };
+
+export const delSpu = (spuId) => {
+  return request({
+    url: `list-api/admin/product/deleteSpu/${spuId}`,
+    method: "delete",
+  });
+};
