@@ -19,3 +19,18 @@ export const attrInfoList = (category1Id, category2Id, category3Id) => {
     method: "get",
   });
 };
+
+export const saveData = (data) => {
+  return request({
+    url: `list-api/admin/product/saveSkuInfo`,
+    method: "post",
+    data,
+  });
+};
+
+export const Skulist = (spuId) => {
+  return request({
+    url: `list-api/admin/product/findBySpuId/${spuId}`,
+    method: "get",
+  });
+};

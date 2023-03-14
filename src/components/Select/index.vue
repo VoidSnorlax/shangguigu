@@ -70,12 +70,11 @@ export default {
   },
   mounted() {
     this.getCategory1(); //在页面组件挂载完成就获取一级分类数据
-    console.log(this.show);
   },
   methods: {
     //获取一级分类数据
     async getCategory1() {
-      let res = await this.$API.attr.category1();
+      let res = await this.$API.attr.category1();//调用一级分类接口
       if (res.code == 200) {
         this.list1 = res.data;
       }

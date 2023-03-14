@@ -68,11 +68,15 @@
                 size="mini"
                 icon="el-icon-warning"
                 :title="name[3]"
+                @click="message(row)"
               ></Hitbutton>
             </template>
           </el-table-column>
         </el-table>
-        <!-- 分页器 -->
+        <!-- 
+          分页器 
+          current-page:当前页
+        -->
         <el-pagination
           :current-page="1"
           :page-size="limit"
@@ -84,11 +88,42 @@
           style="margin-top: 20px; text-align: center"
         >
         </el-pagination>
+
+        <!-- 对话框 -->
+
+        <el-dialog :title="row.spuName" :visible.sync="dialogTableVisible">
+          <el-table :data="messageData" style="width: 100%" border>
+            <el-table-column
+              property="skuName"
+              label="名称"
+              width="150"
+            ></el-table-column>
+            <el-table-column
+              property="price"
+              label="价格"
+              width="200"
+            ></el-table-column>
+            <el-table-column
+              property="weight"
+              label="重量"
+              width="200"
+            ></el-table-column>
+            <el-table-column property="name" label="默认图片" width="400">
+              <template slot-scope="{ row, $index }">
+                <img
+                  :src="row.skuDefaultImg"
+                  alt=""
+                  style="width: 100px; height: 100px"
+                />
+              </template>
+            </el-table-column>
+          </el-table>
+        </el-dialog>
       </div>
       <!-- 添加或者修改SPU -->
       <Spuform v-show="show == 1" @cacel="cacel" ref="spf"></Spuform>
       <!-- 添加Sku -->
-      <Skuform v-show="show == 2" ref="skf"></Skuform>
+      <Skuform v-show="show == 2" ref="skf" @cancel="canel"></Skuform>
     </el-card>
   </div>
 </template>
@@ -111,12 +146,16 @@ export default {
       total: 0, //分页器一共需要多少数据
       show: 0, //控制显示组件(0:Sku列表展示,1:添加或者修改SPU,2:添加Sku)
       name: ["操作", "更新", "删除", "信息"],
+      dialogTableVisible: false,
+      row: {},
+      messageData: [],
     };
   },
   methods: {
     //获取列表数据
     async getList(pages = 1) {
-      this.page = pages;
+      //默认参数为1(如果不传入其他参数,默认是1)
+      this.page = pages; //赋值page参数
       let { page, limit, category3Id } = this; //解构出需要的参数
       let res = await this.$API.sku.getProduct(page, limit, category3Id); //发送请求
       if (res.code == 200) {
@@ -129,7 +168,7 @@ export default {
       /* 当第三个下拉菜单触发时传入对应的ID,调用获取方法 */
       if (leave == 1) {
         this.id1 = ID;
-        this.id2 = "";
+        this.id2 = ""; //防止再次改变时数据出现问题(每一次改变数据的时候都讲剩余ID的置空)
         this.id3 = "";
       } else if (leave == 2) {
         this.id2 = ID;
@@ -141,13 +180,14 @@ export default {
     },
     //点击改变显示数量
     handleSizeChange(limt) {
+      //limit为每页条数
       this.limit = limt;
       this.getList();
     },
     //Sku增加
     addSpu() {
-      this.show = 1;
-      this.$refs.spf.addSku(this.category3Id);
+      this.show = 1; //打开编辑模式
+      this.$refs.spf.addSku(this.category3Id); //调用子组件的方法(这样可以每点击一次都发送一次请求)
     },
     //自定义事件(子组件触发用于从编辑模式回到展示数据模式)
     cacel({ sence, flag }) {
@@ -155,10 +195,12 @@ export default {
         1.接受子组件传来的数据
         2.改变显示值(show)
       */
-      this.show = sence;
+      this.show = sence; //控制显示
+      //如果传入的是修改就调用获取列表数据并传入当前页
       if (flag == "修改") {
         this.getList(this.page);
       } else {
+        //如果是新增就直接调用方法(默认参数为第一页)
         this.getList();
       }
     },
@@ -167,22 +209,38 @@ export default {
       this.show = 1; //显示编辑模式
       this.$refs.spf.initSpudata(row); //在父组件直接调用子组件方法(initSpudata)传入每一行的数据
     },
+    //删除方法
     async del(row) {
-      console.log(111);
-      let { id } = row;
-      let res = await this.$API.sku.delSpu(id);
+      let { id } = row; //解构出需要的参数
+      let res = await this.$API.sku.delSpu(id); //调用接口发送请求
       if (res.code == 200) {
-        this.$message.success("删除成功");
+        this.$message.success("删除成功"); //提示用户
+        /*
+          如果数据小于1就返回上一页，大于1就是当前页,防止出现空数据页的情况
+        */
         this.getList(this.records.length > 1 ? this.page : this.page - 1);
       }
     },
+    //操作Sku
     optionSku(row) {
-      this.show = 2;
+      this.show = 2; //切换显示
       this.$refs.skf.initSkuData(this.id1, this.id2, row);
+    },
+    canel(num) {
+      this.show = num;
+    },
+    //查看信息
+    async message(row) {
+      this.dialogTableVisible = true;
+      this.row = row;
+      let res = await this.$API.spu.Skulist(row.id);
+      if (res.code == 200) {
+        this.messageData = res.data;
+      }
     },
   },
   components: {
-    Skuform,
+    Skuform, //注册组件
     Spuform,
   },
 };

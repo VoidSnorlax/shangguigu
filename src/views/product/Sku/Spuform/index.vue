@@ -1,11 +1,19 @@
 <template>
   <div class="">
     <el-form ref="form" label-width="80px" :model="spu">
+      <!-- 输入框 -->
       <el-form-item label="SPU名称">
         <el-input placeholder="请输入Spu" v-model="spu.spuName"></el-input>
       </el-form-item>
+      <!-- 选则器 -->
       <el-form-item label="品牌">
+        <!-- 
+          el-select选择器与el-option连用
+          el-option中的value与el-select
+          中的v-model绑定
+        -->
         <el-select placeholder="请选则" clearable v-model="spu.tmId">
+          <!-- el-option -->
           <el-option
             :label="item.tmName"
             :value="item.id"
@@ -14,6 +22,7 @@
           ></el-option>
         </el-select>
       </el-form-item>
+      <!-- 文本输入框 -->
       <el-form-item label="SPU描述">
         <el-input
           type="textarea"
@@ -23,6 +32,7 @@
           v-model="spu.description"
         ></el-input>
       </el-form-item>
+      <!-- 照片墙 -->
       <el-form-item label="图片">
         <!-- 
           图片墙组件
