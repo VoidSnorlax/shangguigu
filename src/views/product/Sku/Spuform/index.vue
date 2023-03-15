@@ -178,19 +178,22 @@ export default {
     };
   },
   methods: {
+    //保存按钮
     async onSubmit() {
+      //对提交参数的属性值进行整理
       this.spu.spuImageList = this.spuImageList.map((item, index) => {
         return {
           imgName: item.name,
           imgUrl: item.url,
         };
       });
-      let res = await this.$API.sku.reqSaveOrUpdate(this.spu);
+      let res = await this.$API.sku.reqSaveOrUpdate(this.spu); //调用接口
+      //提交成功
       if (res.code == 200) {
-        this.$message.success("添加完成");
-        this.$emit("cacel", { sence: 0, flag: this.spu.id ? "修改" : "增加" });
+        this.$message.success("添加完成"); //提示用户
+        this.$emit("cacel", { sence: 0, flag: this.spu.id ? "修改" : "增加" }); //回到显示数据页面
       }
-      Object.assign(this._data, this.$options.data());
+      Object.assign(this._data, this.$options.data()); //清空数据
     },
     //初始化表单
     async initSpudata(row) {
@@ -219,43 +222,52 @@ export default {
         this.BaseSaleAttrList = BaseSaleAttrList.data;
       }
     },
+    //点击展示图片回调函数
     handlePictureCardPreview(file) {
-      this.imgUrl = file.url;
-      this.dialogVisible = true;
+      this.imgUrl = file.url; //赋值图片地址
+      this.dialogVisible = true; //打开展示框
     },
+    //删除图片回调
     handleRemove(file, fileList) {
-      this.spuImageList = fileList;
+      this.spuImageList = fileList; //fileList为删除后图片数组赋值给当前图片数组
     },
+
+    //上传成功回调
     handleAvatarSuccess(response, file, fileList) {
       this.spuImageList = fileList;
       console.log(file);
-      file.url = response.data;
+      file.url = response.data; //将上传成功获取的url赋值给当前的图片信息
     },
+    //点击标签关闭回调事件
     handleClose(row, index) {
-      row.spuSaleAttrValueList.splice(index, 1);
+      row.spuSaleAttrValueList.splice(index, 1); //调用数组方法实现假删除
     },
+    //添加销售属性回调
     addData() {
-      let [baseSaleAttrId, saleAttrName] = this.attrID.split(":");
-      let obj = { baseSaleAttrId, saleAttrName, spuSaleAttrValueList: [] };
-      this.spu.spuSaleAttrList.push(obj);
-      this.attrID = "";
+      let [baseSaleAttrId, saleAttrName] = this.attrID.split(":"); //解构出双向绑定的属性ID和属性名称
+      let obj = { baseSaleAttrId, saleAttrName, spuSaleAttrValueList: [] }; //准备一个对象
+      this.spu.spuSaleAttrList.push(obj); //添加到平台属性与属性值数组中
+      this.attrID = ""; //清楚收集未选则属性的ID(方便下次收集)
     },
+    //添加属性值回调
     addAttrValue(row) {
-      this.$set(row, "flag", "true");
-      this.$set(row, "inputvalue", "");
+      console.log(row);
+      this.$set(row, "flag", "true"); //向响应式数据中添加一个flag属性(控制按钮或者输入框显示)
+      this.$set(row, "inputvalue", ""); //向响应式数据添加inputvalue属性(获取用户输入的值)
       this.$nextTick(() => {
-        this.$refs.saveTagInput.focus();
+        this.$refs.saveTagInput.focus(); //自动聚焦
       });
-
-      //
     },
+    //输入框失去焦点回调(保存用户输入数据)
     handleInputConfirm(row) {
-      row.flag = false;
-      let { baseSaleAttrId, saleAttrName, spuId, inputvalue } = row;
+      row.flag = false; //切换为按钮
+      let { baseSaleAttrId, saleAttrName, spuId, inputvalue } = row; //解构出需要的参数
+      //判断用户输入是否为空
       if (inputvalue.trim() == "") {
         this.$message.warning("请输入正确的属性值");
         return;
       }
+      //判断用户输入是否重复
       let res = (row.spuSaleAttrValueList || []).some((item, index) => {
         return item.saleAttrValueName == inputvalue;
       });
@@ -269,8 +281,10 @@ export default {
         spuId,
         saleAttrValueName: inputvalue,
       };
+      //添加到展示数组中
       row.spuSaleAttrValueList.push(obj);
     },
+    //增加sku方法
     async addSku(ID) {
       this.spu.category3Id = ID;
       let TrademarkListData = await this.$API.sku.getTrademarkList();
@@ -282,9 +296,10 @@ export default {
         this.BaseSaleAttrList = BaseSaleAttrList.data;
       }
     },
+    //取消按钮
     cancle() {
-      this.$emit("cacel", { sence: 0, flag: this.spu.id ? "修改" : "增加" });
-      Object.assign(this._data, this.$options.data());
+      this.$emit("cacel", { sence: 0, flag: this.spu.id ? "修改" : "增加" }); //自定义事件触发父组件回调
+      Object.assign(this._data, this.$options.data()); //清楚数据(解决回显问题)
     },
   },
   computed: {

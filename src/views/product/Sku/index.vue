@@ -91,8 +91,17 @@
 
         <!-- 对话框 -->
 
-        <el-dialog :title="row.spuName" :visible.sync="dialogTableVisible">
-          <el-table :data="messageData" style="width: 100%" border>
+        <el-dialog
+          :title="row.spuName"
+          :visible.sync="dialogTableVisible"
+          :before-close="close"
+        >
+          <el-table
+            :data="messageData"
+            style="width: 100%"
+            border
+            v-loading="loading"
+          >
             <el-table-column
               property="skuName"
               label="名称"
@@ -146,9 +155,10 @@ export default {
       total: 0, //分页器一共需要多少数据
       show: 0, //控制显示组件(0:Sku列表展示,1:添加或者修改SPU,2:添加Sku)
       name: ["操作", "更新", "删除", "信息"],
-      dialogTableVisible: false,
-      row: {},
-      messageData: [],
+      dialogTableVisible: false, //控制对话框显示
+      row: {}, //点击查看信息传入的表格行数据
+      messageData: [], //获取信息数据
+      loading: true, //等待动画
     };
   },
   methods: {
@@ -224,19 +234,28 @@ export default {
     //操作Sku
     optionSku(row) {
       this.show = 2; //切换显示
-      this.$refs.skf.initSkuData(this.id1, this.id2, row);
+      this.$refs.skf.initSkuData(this.id1, this.id2, row); //调用子组件方法传入参数
     },
+    //自定义事件(子组件触发用于从编辑模式回到展示数据模式)
     canel(num) {
       this.show = num;
     },
     //查看信息
     async message(row) {
-      this.dialogTableVisible = true;
-      this.row = row;
-      let res = await this.$API.spu.Skulist(row.id);
+      this.dialogTableVisible = true; //打开对话框
+      this.row = row; //赋值
+      let res = await this.$API.spu.Skulist(row.id); //调用接口
+
       if (res.code == 200) {
+        this.loading = false;
         this.messageData = res.data;
       }
+    },
+    //关闭对话框回调
+    close(done) {
+      this.loading = true;
+      this.messageData = [];
+      done();
     },
   },
   components: {

@@ -34,3 +34,31 @@ export const Skulist = (spuId) => {
     method: "get",
   });
 };
+
+export const reqList = (page, limit) => {
+  return request({
+    url: `list-api/admin/product/list/${page}/${limit}`,
+    method: "get",
+  });
+};
+//上架商品接口
+export const reqSale = (skuId) => {
+  return request({
+    url: `list-api/admin/product/onSale/${skuId}`,
+    method: "get",
+  });
+};
+//下架商品接口
+export const reqCancel = (skuId) => {
+  return request({
+    url: `list-api/admin/product/cancelSale/${skuId}`,
+    method: "get",
+  });
+};
+
+export const reqGetSku = (skuId) => {
+  return request({
+    url: `list-api/admin/product/getSkuById/${skuId}`,
+    method: "get",
+  });
+};
