@@ -13,6 +13,9 @@
       <el-col :span="6"
         ><el-card class="box-card"
           ><detail title="访问量" value="88460">
+            <template slot="charts">
+              <lines></lines>
+            </template>
             <template slot="footer">
               <!-- 使用 v-html解决&nbsp;空格只有一个生效的问题-->
               <div v-html="` <span>日访问量 &nbsp;&nbsp;1234</span>`"></div>
@@ -21,6 +24,9 @@
       <el-col :span="6"
         ><el-card class="box-card"
           ><detail title="支付笔数" value="88462">
+            <template slot="charts">
+              <bar></bar>
+            </template>
             <template slot="footer">
               <span>转化率&nbsp; 65%</span>
             </template>
@@ -30,6 +36,9 @@
       <el-col :span="6"
         ><el-card class="box-card"
           ><detail title="运营活动效果" value="78%">
+            <template slot="charts">
+              <process></process>
+            </template>
             <template slot="footer">
               <span
                 >周同比 &nbsp; 12%&nbsp;<i class="el-icon-caret-top"></i
@@ -43,12 +52,18 @@
 
 <script>
 import detail from "./detail/index.vue";
+import lines from "./echarts/index.vue";
+import bar from "./barcharts/index.vue";
+import process from "./progress/index.vue";
 export default {
   name: "card",
   components: {
     detail,
+    lines,
+    bar,
+    process,
   },
 };
 </script>
 
-<style lang="scss" scoped></style>
+<style scoped></style>

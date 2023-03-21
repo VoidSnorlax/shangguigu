@@ -33,10 +33,10 @@
           >
           </el-table-column>
           <el-table-column label="序号" width="col.width" prop="attrValueList">
-            <template slot-scope="{ row, index }">
+            <template slot-scope="{ row }">
               <el-tag
                 type="success"
-                v-for="(item, index) in row.attrValueList"
+                v-for="(item) in row.attrValueList"
                 :key="item.id"
                 style="margin: 0px 20px"
                 >{{ item.valueName }}</el-tag
@@ -44,7 +44,7 @@
             </template>
           </el-table-column>
           <el-table-column type="index" label="序号" width="180" align="center">
-            <template slot-scope="{ row, index }">
+            <template slot-scope="{row}">
               <el-button
                 type="warning"
                 icon="el-icon-edit"

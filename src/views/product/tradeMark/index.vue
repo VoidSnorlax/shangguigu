@@ -251,8 +251,8 @@ export default {
       //调用UI组件弹框
       this.$confirm(`是否删除${row.tmName}`, "删除", {
         distinguishCancelAndClose: true,
-        confirmButtonText: "删除",//确定按钮
-        cancelButtonText: "取消",//取消按钮
+        confirmButtonText: "删除", //确定按钮
+        cancelButtonText: "取消", //取消按钮
       })
         .then(async () => {
           let res = await this.$API.trademark.del(row.id); //调用删除接口(传入ID)

@@ -245,7 +245,6 @@ export default {
       this.dialogTableVisible = true; //打开对话框
       this.row = row; //赋值
       let res = await this.$API.spu.Skulist(row.id); //调用接口
-
       if (res.code == 200) {
         this.loading = false;
         this.messageData = res.data;

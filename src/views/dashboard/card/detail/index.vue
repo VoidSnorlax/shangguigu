@@ -1,7 +1,10 @@
 <template>
   <div>
-    <div class="header"><span>{{ title }}</span><i class="el-icon-info"></i></div>
-    <div class="context">{{value}}</div>
+    <div class="header">
+      <span>{{ title }}</span
+      ><i class="el-icon-info"></i>
+    </div>
+    <div class="context">{{ value }}</div>
     <div class="charts">
       <slot name="charts"></slot>
     </div>
@@ -11,8 +14,8 @@
 
 <script>
 export default {
-  name: "details",
-  props: ["title",'value'],
+  name: "detail",
+  props: ["title", "value"],
 };
 </script>
 
@@ -26,7 +29,7 @@ export default {
   padding: 10px 0;
 }
 .charts {
-  height: 40px;
+  height: 50px;
 }
 .footer {
   border-top: 1px solid wheat;
