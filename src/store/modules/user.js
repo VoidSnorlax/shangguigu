@@ -11,7 +11,7 @@ const getDefaultState = () => {
 };
 
 const state = getDefaultState();
-
+//mutations唯一修改state的地方
 const mutations = {
   RESET_STATE: (state) => {
     Object.assign(state, getDefaultState());
@@ -38,10 +38,10 @@ const actions = {
     if (res.code == 20000) {
       const { data } = res; //解构data
       commit("SET_TOKEN", data.token); //提交到mutations
-      setToken(data.token);//调用setToken()方法
+      setToken(data.token); //调用setToken()方法
       return "ok";
     } else {
-      return Promise.reject(new Error("false"));//抛出错误
+      return Promise.reject(new Error("false")); //抛出错误
     }
   },
 
