@@ -181,6 +181,12 @@ export default {
         this.$emit("cancel", 0);
       }
     },
+    /**
+     * 
+     * @param {*} id1 
+     * @param {*} id2 
+     * @param {*} row 
+     */
     initSkuData(id1, id2, row) {
       this.row = row;
       Promise.all([
@@ -202,7 +208,7 @@ export default {
       });
     },
     //设置默认(只允许有一个默认)
-    isDefault(row) {
+     isDefault(row) {
       /* 
         排他算法
         1.点击谁设置谁为默认(通过参数row)

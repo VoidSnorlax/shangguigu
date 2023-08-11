@@ -251,7 +251,6 @@ export default {
     },
     //添加属性值回调
     addAttrValue(row) {
-      console.log(row);
       this.$set(row, "flag", "true"); //向响应式数据中添加一个flag属性(控制按钮或者输入框显示)
       this.$set(row, "inputvalue", ""); //向响应式数据添加inputvalue属性(获取用户输入的值)
       this.$nextTick(() => {
