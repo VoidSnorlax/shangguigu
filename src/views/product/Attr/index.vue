@@ -36,7 +36,7 @@
             <template slot-scope="{ row }">
               <el-tag
                 type="success"
-                v-for="(item) in row.attrValueList"
+                v-for="item in row.attrValueList"
                 :key="item.id"
                 style="margin: 0px 20px"
                 >{{ item.valueName }}</el-tag
@@ -44,7 +44,7 @@
             </template>
           </el-table-column>
           <el-table-column type="index" label="序号" width="180" align="center">
-            <template slot-scope="{row}">
+            <template slot-scope="{ row }">
               <el-button
                 type="warning"
                 icon="el-icon-edit"
@@ -168,7 +168,10 @@ export default {
     };
   },
   methods: {
-    //自定义事件(获取子组件的分类ID)
+    /**
+     * @description: 自定义事件(获取子组件的分类ID)
+     * @return {*}
+     */
     getID({ ID, leave }) {
       //根据传入的leave进行判断确定对应的ID号
       if (leave == 1) {
@@ -184,7 +187,10 @@ export default {
         this.getall();
       }
     },
-    //获取所有属性
+    /**
+     * @description: 获取所有属性
+     * @return {*}
+     */
     async getall() {
       let { id1, id2, id3 } = this; //解构出各级id
       let res = await this.$API.attr.getCategory(id1, id2, id3); ///发送请求
@@ -192,7 +198,10 @@ export default {
         this.dataList = res.data; //渲染表格数据
       }
     },
-    //新增属性值
+    /**
+     * @description: 新增属性值
+     * @return {*}
+     */
     addNew() {
       //每点击一次新增表格增加一行(向表格绑定的数组中push数据(vue中数组的push方法经过重新可以直接添加响应式数据))
       this.attrInfo.attrValueList.push({
@@ -205,7 +214,10 @@ export default {
         this.$refs[this.attrInfo.attrValueList.length - 1].focus();
       });
     },
-    //新增属性
+    /**
+     * @description: 新增属性
+     * @return {*}
+     */
     plusAttr() {
       this.showthis = false; //关闭所有属性表格
       //解决返回数据回显问题(将对象值置空)
@@ -216,7 +228,11 @@ export default {
         categoryLevel: 3,
       };
     },
-    //修改属性
+    /**
+     * @description: 修改属性
+     * @param {*} row 选中行
+     * @return {*}
+     */
     insertAttr(row) {
       /* 
         1.关闭展示表格切换为编辑模式
@@ -231,7 +247,11 @@ export default {
         this.$set(item, "flag", false);
       });
     },
-    //表格行编辑模式
+    /**
+     * @description: 表格行编辑模式
+     * @param {*} row 选中行
+     * @return {*}
+     */
     look(row) {
       /* 
         1.在input组件上绑定一个聚焦事件
@@ -264,7 +284,12 @@ export default {
       if (res) return;
       row.flag = false; //失去焦点为查看模式
     },
-    //表格行查看模式
+    /**
+     * @description: 表格行查看模式
+     * @param {*} row 行属性
+     * @param {*} index 行索引
+     * @return {*}
+     */
     showInput(row, $index) {
       /* 
         1.在div上绑定一个点击的回调事件
@@ -282,14 +307,21 @@ export default {
         this.$refs[$index].focus(); //调用input组件的聚焦方法
       });
     },
-    //删除属性值
+    /**
+     * @description: 删除属性值
+     * @param {*} index 行索引
+     * @return {*}
+     */
     del(index) {
       /* 
         1.通过获取表格行的索引进行逻辑删除
       */
       this.attrInfo.attrValueList.splice(index, 1); //通过传入的下标删除数据
     },
-    //提交修改
+    /**
+     * @description: 提交
+     * @return {*}
+     */
     async save() {
       /* 
         1.整理提交的数据
@@ -318,7 +350,6 @@ export default {
 
       try {
         let res = await this.$API.attr.saveAttrInfo(this.attrInfo); //调用提交接口
-        console.log(res);
         this.showthis = true; //关闭修改界面
         this.$message.success("添加成功"); //提示用户信息
         this.getall(); //重新获取数据
